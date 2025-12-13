@@ -1,0 +1,32 @@
+# Rust build artifacts
+/target
+Cargo.lock
+
+# Environment variables (contains secrets)
+.env
+
+# IDE/Editor specific
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Debug files
+*.pdb
+
+# Backup files
+*.bak
+*.tmp
+
+# Logs
+*.log
+
+# SSL certificates (if you have them)
+*.pem
+*.key
+*.crt
+
+# OS specific
+Thumbs.db
