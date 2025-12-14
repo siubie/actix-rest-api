@@ -1,10 +1,23 @@
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use serde::Serialize;
 use std::fmt;
+use validator::ValidationErrors;
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
     pub error: String,
+    pub message: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ValidationErrorResponse {
+    pub error: String,
+    pub errors: Vec<FieldError>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FieldError {
+    pub field: String,
     pub message: String,
 }
 
@@ -14,7 +27,7 @@ pub enum AppError {
     DatabaseError(String),
     NotFound(String),
     BadRequest(String),
-    ValidationError(String),
+    ValidationError(ValidationErrors),
     InternalServerError(String),
 }
 
@@ -24,7 +37,7 @@ impl fmt::Display for AppError {
             AppError::DatabaseError(msg) => write!(f, "Database error: {}", msg),
             AppError::NotFound(msg) => write!(f, "Not found: {}", msg),
             AppError::BadRequest(msg) => write!(f, "Bad request: {}", msg),
-            AppError::ValidationError(msg) => write!(f, "Validation error: {}", msg),
+            AppError::ValidationError(errors) => write!(f, "Validation error: {}", errors),
             AppError::InternalServerError(msg) => write!(f, "Internal server error: {}", msg),
         }
     }

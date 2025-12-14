@@ -22,7 +22,7 @@ pub async fn create_user(
 ) -> Result<impl Responder, AppError> {
     // Validate the request
     request.validate()
-        .map_err(|e| AppError::ValidationError(e.to_string()))?;
+        .map_err(AppError::ValidationError)?;
 
     let user = UserService::create_user(db.get_pool(), request.into_inner()).await?;
     Ok(HttpResponse::Created().json(user))
@@ -87,7 +87,7 @@ pub async fn update_user(
 ) -> Result<impl Responder, AppError> {
     // Validate the request
     request.validate()
-        .map_err(|e| AppError::ValidationError(e.to_string()))?;
+        .map_err(AppError::ValidationError)?;
 
     let user = UserService::update_user(db.get_pool(), path.into_inner(), request.into_inner()).await?;
     Ok(HttpResponse::Ok().json(user))
