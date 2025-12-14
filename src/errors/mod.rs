@@ -45,22 +45,45 @@ impl fmt::Display for AppError {
 
 impl ResponseError for AppError {
     fn error_response(&self) -> HttpResponse {
-        let (status, error_type, message) = match self {
-            AppError::DatabaseError(msg) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR", msg)
-            }
-            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "NOT_FOUND", msg),
-            AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "BAD_REQUEST", msg),
-            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", msg),
-            AppError::InternalServerError(msg) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", msg)
-            }
-        };
+        match self {
+            AppError::ValidationError(errors) => {
+                let field_errors: Vec<FieldError> = errors
+                    .field_errors()
+                    .iter()
+                    .flat_map(|(field, errors)| {
+                        errors.iter().map(move |error| FieldError {
+                            field: field.to_string(),
+                            message: error.message.as_ref()
+                                .map(|m| m.to_string())
+                                .unwrap_or_else(|| format!("Validation failed for {}", field)),
+                        })
+                    })
+                    .collect();
 
-        HttpResponse::build(status).json(ErrorResponse {
-            error: error_type.to_string(),
-            message: message.to_string(),
-        })
+                HttpResponse::build(StatusCode::BAD_REQUEST).json(ValidationErrorResponse {
+                    error: "VALIDATION_ERROR".to_string(),
+                    errors: field_errors,
+                })
+            }
+            _ => {
+                let (status, error_type, message) = match self {
+                    AppError::DatabaseError(msg) => {
+                        (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_ERROR", msg)
+                    }
+                    AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "NOT_FOUND", msg),
+                    AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "BAD_REQUEST", msg),
+                    AppError::InternalServerError(msg) => {
+                        (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", msg)
+                    }
+                    _ => unreachable!(),
+                };
+
+                HttpResponse::build(status).json(ErrorResponse {
+                    error: error_type.to_string(),
+                    message: message.to_string(),
+                })
+            }
+        }
     }
 
     fn status_code(&self) -> StatusCode {
