@@ -1,6 +1,6 @@
 # Actix-web REST API with MySQL
 
-[![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
+[![Rust](https://img.shields.io/badge/rust-1.80%2B-orange.svg)](https://www.rust-lang.org/)
 [![Actix-web](https://img.shields.io/badge/actix--web-4.0-blue.svg)](https://actix.rs/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -18,6 +18,7 @@ A production-ready REST API template built with Actix-web, MySQL, and OpenAPI do
 - [Docker Deployment](#docker-deployment)
 - [API Documentation](#api-documentation)
 - [API Endpoints](#api-endpoints)
+- [Error Handling](#error-handling)
 - [Architecture](#architecture)
 - [Development](#development)
 - [Troubleshooting](#troubleshooting)
@@ -78,7 +79,7 @@ hello-actix/
 - **Docker Compose** 2.0 or higher
 
 ### For Local Development
-- **Rust** 1.75 or higher ([install here](https://www.rust-lang.org/tools/install))
+- **Rust** 1.80 or higher ([install here](https://www.rust-lang.org/tools/install))
 - **MySQL** 8.0 or higher
 - **cargo** (comes with Rust)
 
@@ -287,14 +288,71 @@ curl -X POST http://127.0.0.1:8080/api/users \
   }'
 ```
 
+**Success Response (201 Created):**
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+**Validation Error Response (400 Bad Request):**
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "errors": [
+    {
+      "field": "email",
+      "message": "Invalid email format"
+    },
+    {
+      "field": "name",
+      "message": "Name must be between 1 and 100 characters"
+    }
+  ]
+}
+```
+
 ### Get All Users
 ```bash
 curl http://127.0.0.1:8080/api/users
 ```
 
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "created_at": "2024-01-15T10:30:00Z"
+  }
+]
+```
+
 ### Get a User by ID
 ```bash
 curl http://127.0.0.1:8080/api/users/1
+```
+
+**Success Response:**
+```json
+{
+  "id": 1,
+  "name": "John Doe",
+  "email": "john@example.com",
+  "created_at": "2024-01-15T10:30:00Z"
+}
+```
+
+**Error Response (404 Not Found):**
+```json
+{
+  "error": "NOT_FOUND",
+  "message": "User not found"
+}
 ```
 
 ### Update a User
@@ -310,6 +368,74 @@ curl -X PUT http://127.0.0.1:8080/api/users/1 \
 ### Delete a User
 ```bash
 curl -X DELETE http://127.0.0.1:8080/api/users/1
+```
+
+## Error Handling
+
+The API provides structured error responses for different error scenarios:
+
+### Error Response Types
+
+#### Standard Error Response
+For most errors (database, not found, bad request, internal server):
+```json
+{
+  "error": "ERROR_TYPE",
+  "message": "Descriptive error message"
+}
+```
+
+#### Validation Error Response
+For request validation failures with detailed field-level errors:
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "errors": [
+    {
+      "field": "field_name",
+      "message": "Specific validation message"
+    }
+  ]
+}
+```
+
+### Error Types
+
+| Status Code | Error Type | Description |
+|-------------|------------|-------------|
+| `400` | `BAD_REQUEST` | Invalid request format or parameters |
+| `400` | `VALIDATION_ERROR` | Request validation failed (with field details) |
+| `404` | `NOT_FOUND` | Resource not found |
+| `500` | `DATABASE_ERROR` | Database operation failed |
+| `500` | `INTERNAL_SERVER_ERROR` | Unexpected server error |
+
+### Validation Rules
+
+- **Email**: Must be a valid email format (max 255 characters)
+- **Name**: Required, 1-100 characters
+
+Example validation error for invalid input:
+```bash
+curl -X POST http://127.0.0.1:8080/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "", "email": "invalid-email"}'
+```
+
+Response:
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "errors": [
+    {
+      "field": "name",
+      "message": "Name must be between 1 and 100 characters"
+    },
+    {
+      "field": "email",
+      "message": "Invalid email format"
+    }
+  ]
+}
 ```
 
 ## Architecture
