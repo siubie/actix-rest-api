@@ -30,21 +30,28 @@ A production-ready REST API template built with Actix-web, MySQL, and OpenAPI do
 - 🗄️ MySQL database integration with connection pooling
 - 📚 OpenAPI 3.0 specification with interactive Swagger UI
 - 🛡️ Comprehensive error handling with custom error types
-- ✅ Request validation in service layer
+- ✅ Advanced request validation with detailed field-level error messages
+  - Email format validation
+  - Name length constraints (1-100 characters)
+  - Email length constraints (max 255 characters)
 - 🌐 CORS support for cross-origin requests
 - 📝 Structured logging middleware
 - 🏗️ Clean architecture with clear separation of concerns
 - ⚡ Async/await throughout for optimal performance
 - 🔧 Environment-based configuration
+- 🐳 Docker support with optimized multi-stage builds
+- 🛠️ Makefile commands for streamlined development workflow
 
 ## Technology Stack
 
 - **[Actix-web](https://actix.rs/)** - Fast, pragmatic web framework for Rust
 - **[SQLx](https://github.com/launchbadge/sqlx)** - Async, pure Rust SQL toolkit with compile-time checked queries
 - **[utoipa](https://github.com/juhaku/utoipa)** - Auto-generated OpenAPI documentation from code
+- **[validator](https://github.com/Keats/validator)** - Struct validation with custom error messages
 - **[Serde](https://serde.rs/)** - Serialization/deserialization framework
 - **[Tokio](https://tokio.rs/)** - Async runtime for Rust
 - **MySQL 8.0+** - Relational database
+- **Docker & Docker Compose** - Containerization and orchestration
 
 ## Project Structure
 
