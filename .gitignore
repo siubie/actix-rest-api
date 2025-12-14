@@ -1,6 +1,6 @@
 # Rust build artifacts
 /target
-Cargo.lock
+# Note: Cargo.lock should be committed for binary projects, not ignored
 
 # Environment variables (contains secrets)
 .env

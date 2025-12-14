@@ -18,3 +18,4 @@ utoipa = { version = "4", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "6", features = ["actix-web"] }
 anyhow = "1.0"
 thiserror = "1.0"
+validator = { version = "0.18", features = ["derive"] }

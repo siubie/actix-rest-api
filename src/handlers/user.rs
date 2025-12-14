@@ -1,4 +1,5 @@
 use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+use validator::Validate;
 use crate::config::database::DatabaseConfig;
 use crate::dto::user_dto::{CreateUserRequest, UpdateUserRequest};
 use crate::errors::AppError;
@@ -19,6 +20,10 @@ pub async fn create_user(
     db: web::Data<DatabaseConfig>,
     request: web::Json<CreateUserRequest>,
 ) -> Result<impl Responder, AppError> {
+    // Validate the request
+    request.validate()
+        .map_err(|e| AppError::ValidationError(e.to_string()))?;
+
     let user = UserService::create_user(db.get_pool(), request.into_inner()).await?;
     Ok(HttpResponse::Created().json(user))
 }
@@ -80,6 +85,10 @@ pub async fn update_user(
     path: web::Path<i64>,
     request: web::Json<UpdateUserRequest>,
 ) -> Result<impl Responder, AppError> {
+    // Validate the request
+    request.validate()
+        .map_err(|e| AppError::ValidationError(e.to_string()))?;
+
     let user = UserService::update_user(db.get_pool(), path.into_inner(), request.into_inner()).await?;
     Ok(HttpResponse::Ok().json(user))
 }

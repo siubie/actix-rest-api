@@ -13,6 +13,9 @@ A production-ready REST API template built with Actix-web, MySQL, and OpenAPI do
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
+  - [Option 1: Docker Compose (Recommended)](#option-1-docker-compose-recommended)
+  - [Option 2: Local MySQL](#option-2-local-mysql)
+- [Docker Deployment](#docker-deployment)
 - [API Documentation](#api-documentation)
 - [API Endpoints](#api-endpoints)
 - [Architecture](#architecture)
@@ -63,13 +66,66 @@ hello-actix/
 
 ## Prerequisites
 
+### For Docker (Recommended)
+- **Docker** 20.10 or higher
+- **Docker Compose** 2.0 or higher
+
+### For Local Development
 - **Rust** 1.75 or higher ([install here](https://www.rust-lang.org/tools/install))
-- **MySQL** 8.0 or higher (or Docker)
+- **MySQL** 8.0 or higher
 - **cargo** (comes with Rust)
 
 ## Quick Start
 
-### Option 1: Local MySQL
+### Option 1: Docker Compose (Recommended)
+
+This is the easiest way to get started. Everything runs in containers with no local MySQL installation required.
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/hello-actix.git
+   cd hello-actix
+   ```
+
+2. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+
+   The defaults in `.env.example` work out of the box for Docker Compose!
+
+3. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
+
+   This will:
+   - Pull the MySQL 8.0 image
+   - Build your Rust application
+   - Run database migrations automatically
+   - Start both services
+
+4. **View logs**
+   ```bash
+   docker-compose logs -f app
+   ```
+
+5. **Access the application**
+   - API: http://localhost:8080
+   - Swagger UI: http://localhost:8080/swagger-ui/
+   - Health check: http://localhost:8080/health
+
+6. **Stop the application**
+   ```bash
+   docker-compose down
+   ```
+
+   To also remove volumes (database data):
+   ```bash
+   docker-compose down -v
+   ```
+
+### Option 2: Local MySQL
 
 1. **Clone the repository**
    ```bash
@@ -113,25 +169,84 @@ hello-actix/
 
 The server will start at `http://127.0.0.1:8080`
 
-### Option 2: Using Docker for MySQL
+## Docker Deployment
 
-1. **Start MySQL with Docker**
+### Development Environment
+
+Use the standard `docker-compose.yml` for development:
+
+```bash
+# Start services
+docker-compose up -d
+
+# Rebuild after code changes
+docker-compose up -d --build
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Production Environment
+
+For production deployments, use `docker-compose.prod.yml`:
+
+1. **Create production environment file**
    ```bash
-   docker run --name mysql-actix -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=rust -p 3306:3306 -d mysql:8.0
+   cp .env.example .env.prod
    ```
 
-2. **Run migrations**
-   ```bash
-   docker exec -i mysql-actix mysql -uroot -ppassword rust < migrations/01_create_users_table.sql
-   ```
-
-3. **Update `.env` and run**
+   Update `.env.prod` with secure credentials:
    ```env
-   DATABASE_URL=mysql://root:password@127.0.0.1:3306/rust
+   DB_USER=produser
+   DB_PASSWORD=<strong-password>
+   DB_NAME=rust_prod
+   DB_ROOT_PASSWORD=<strong-root-password>
+   RUST_LOG=warn
+   APP_PORT=8080
    ```
+
+2. **Deploy with production configuration**
    ```bash
-   cargo run
+   docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
    ```
+
+3. **View production logs**
+   ```bash
+   docker-compose -f docker-compose.prod.yml logs -f
+   ```
+
+### Docker Commands Reference
+
+```bash
+# Build only
+docker-compose build
+
+# Run migrations manually
+docker-compose exec db mysql -uroot -p${DB_ROOT_PASSWORD} ${DB_NAME} < migrations/01_create_users_table.sql
+
+# Access MySQL shell
+docker-compose exec db mysql -u${DB_USER} -p${DB_PASSWORD} ${DB_NAME}
+
+# Access application container
+docker-compose exec app sh
+
+# Check service status
+docker-compose ps
+
+# Remove everything (including volumes)
+docker-compose down -v
+```
+
+### Multi-Stage Build Benefits
+
+The Dockerfile uses a multi-stage build which:
+- **Reduces image size**: Final image is ~100MB vs ~2GB
+- **Improves security**: Only runtime dependencies included
+- **Faster deployments**: Smaller images transfer faster
+- **Layer caching**: Dependency layer cached separately from code
 
 ## API Documentation
 

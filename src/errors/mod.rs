@@ -14,6 +14,7 @@ pub enum AppError {
     DatabaseError(String),
     NotFound(String),
     BadRequest(String),
+    ValidationError(String),
     InternalServerError(String),
 }
 
@@ -23,6 +24,7 @@ impl fmt::Display for AppError {
             AppError::DatabaseError(msg) => write!(f, "Database error: {}", msg),
             AppError::NotFound(msg) => write!(f, "Not found: {}", msg),
             AppError::BadRequest(msg) => write!(f, "Bad request: {}", msg),
+            AppError::ValidationError(msg) => write!(f, "Validation error: {}", msg),
             AppError::InternalServerError(msg) => write!(f, "Internal server error: {}", msg),
         }
     }
@@ -36,6 +38,7 @@ impl ResponseError for AppError {
             }
             AppError::NotFound(msg) => (StatusCode::NOT_FOUND, "NOT_FOUND", msg),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "BAD_REQUEST", msg),
+            AppError::ValidationError(msg) => (StatusCode::BAD_REQUEST, "VALIDATION_ERROR", msg),
             AppError::InternalServerError(msg) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", msg)
             }
@@ -52,6 +55,7 @@ impl ResponseError for AppError {
             AppError::DatabaseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             AppError::NotFound(_) => StatusCode::NOT_FOUND,
             AppError::BadRequest(_) => StatusCode::BAD_REQUEST,
+            AppError::ValidationError(_) => StatusCode::BAD_REQUEST,
             AppError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

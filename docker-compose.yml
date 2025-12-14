@@ -1,0 +1,57 @@
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: actix-mysql-dev
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-devpassword}
+      MYSQL_DATABASE: ${DB_NAME:-rust}
+      MYSQL_USER: ${DB_USER:-rustuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-devpassword}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - actix-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-devpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Rust Application (Development mode with volume mounting)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: actix-app-dev
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql://${DB_USER:-rustuser}:${DB_PASSWORD:-devpassword}@db:3306/${DB_NAME:-rust}
+      HOST: 0.0.0.0
+      PORT: 8080
+      RUST_LOG: ${RUST_LOG:-info}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - actix-network
+    # For development: mount source code for hot reload (optional)
+    # volumes:
+    #   - ./src:/app/src:ro
+    #   - cargo_cache:/usr/local/cargo
+
+networks:
+  actix-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  # cargo_cache:
+  #   driver: local
