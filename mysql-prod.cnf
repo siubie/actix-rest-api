@@ -11,10 +11,5 @@ innodb_flush_method = O_DIRECT
 character-set-server = utf8mb4
 collation-server = utf8mb4_unicode_ci
 
-# Slow query log
-slow_query_log = 1
-slow_query_log_file = /var/log/mysql/slow-query.log
-long_query_time = 2
-
 # Security
 local-infile = 0
