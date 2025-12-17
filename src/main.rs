@@ -8,7 +8,7 @@ mod routes;
 mod services;
 
 use actix_cors::Cors;
-use actix_web::{middleware::Logger, web, App, HttpServer};
+use actix_web::{middleware::{Logger, NormalizePath, TrailingSlash}, web, App, HttpServer};
 use config::database::DatabaseConfig;
 use dotenv::dotenv;
 use std::env;
@@ -78,6 +78,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(db_config.clone()))
             .wrap(cors)
             .wrap(Logger::default())
+            .wrap(NormalizePath::new(TrailingSlash::Trim))
             .configure(routes::config)
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}")
