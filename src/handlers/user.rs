@@ -15,7 +15,7 @@ use crate::services::user_service::UserService;
     ),
     tag = "Users"
 )]
-#[post("/api/users")]
+#[post("/users")]
 pub async fn create_user(
     db: web::Data<DatabaseConfig>,
     request: web::Json<CreateUserRequest>,
@@ -40,7 +40,7 @@ pub async fn create_user(
     ),
     tag = "Users"
 )]
-#[get("/api/users/{id}")]
+#[get("/users/{id}")]
 pub async fn get_user(
     db: web::Data<DatabaseConfig>,
     path: web::Path<i64>,
@@ -57,7 +57,7 @@ pub async fn get_user(
     ),
     tag = "Users"
 )]
-#[get("/api/users")]
+#[get("/users")]
 pub async fn get_all_users(
     db: web::Data<DatabaseConfig>,
 ) -> Result<impl Responder, AppError> {
@@ -79,7 +79,7 @@ pub async fn get_all_users(
     ),
     tag = "Users"
 )]
-#[put("/api/users/{id}")]
+#[put("/users/{id}")]
 pub async fn update_user(
     db: web::Data<DatabaseConfig>,
     path: web::Path<i64>,
@@ -105,7 +105,7 @@ pub async fn update_user(
     ),
     tag = "Users"
 )]
-#[delete("/api/users/{id}")]
+#[delete("/users/{id}")]
 pub async fn delete_user(
     db: web::Data<DatabaseConfig>,
     path: web::Path<i64>,

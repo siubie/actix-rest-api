@@ -35,6 +35,7 @@ A production-ready REST API template built with Actix-web, MySQL, and OpenAPI do
   - Email format validation
   - Name length constraints (1-100 characters)
   - Email length constraints (max 255 characters)
+- 🔀 Smart trailing slash handling for API routes (follows REST best practices)
 - 🌐 CORS support for cross-origin requests
 - 📝 Structured logging middleware
 - 🏗️ Clean architecture with clear separation of concerns
@@ -276,6 +277,16 @@ The Swagger UI provides an interactive interface to test all endpoints directly 
 | `PUT` | `/api/users/{id}` | Update an existing user |
 | `DELETE` | `/api/users/{id}` | Delete a user |
 
+### Trailing Slash Handling
+
+All `/api/*` routes support trailing slashes for convenience:
+- ✅ `/api/users` - Canonical URL (recommended)
+- ✅ `/api/users/` - Also works (normalized to `/api/users`)
+- ✅ `/api/users/1` - Get user by ID
+- ✅ `/api/users/1/` - Also works (normalized to `/api/users/1`)
+
+This follows REST API best practices where the canonical URL has no trailing slash, but both variants are accepted for better client compatibility.
+
 ## Example Requests
 
 ### Create a User
@@ -462,7 +473,26 @@ HTTP Response ← Handler ← Service ← DB Layer
 | **DTOs** | `src/dto/` | API request/response schemas |
 | **Errors** | `src/errors/` | Custom error types and HTTP error responses |
 | **Config** | `src/config/` | Application configuration (database, etc.) |
-| **Routes** | `src/routes/` | Route registration and grouping |
+| **Routes** | `src/routes/` | Route registration and middleware configuration |
+
+### Routing Configuration
+
+The application uses **scoped middleware** for optimal path handling:
+
+- **`/api/*` routes**: Protected by `NormalizePath` middleware with `TrailingSlash::Trim`
+  - Accepts both `/api/users` and `/api/users/`
+  - Normalizes to canonical form without trailing slash
+  - Follows REST API best practices
+
+- **`/swagger-ui/*` routes**: No normalization applied
+  - Requires trailing slash: `/swagger-ui/`
+  - Standard Swagger UI convention
+
+- **Other routes** (e.g., `/health`): Strict matching
+  - Only exact paths accepted
+  - No trailing slash handling
+
+This configuration provides the best of both worlds: forgiving API routes for clients while maintaining strict conventions where needed.
 
 ### Benefits
 

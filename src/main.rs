@@ -78,12 +78,16 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(db_config.clone()))
             .wrap(cors)
             .wrap(Logger::default())
-            .wrap(NormalizePath::new(TrailingSlash::Trim))
-            .configure(routes::config)
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}")
                     .url("/api-docs/openapi.json", openapi.clone()),
             )
+            .service(
+                web::scope("/api")
+                    .wrap(NormalizePath::new(TrailingSlash::Trim))
+                    .configure(routes::config_api)
+            )
+            .configure(routes::config_other)
     })
     .bind(&bind_address)?
     .run()
