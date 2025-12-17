@@ -49,8 +49,9 @@ services:
       HOST: 0.0.0.0
       PORT: 8080
       RUST_LOG: ${RUST_LOG:-warn}
-    ports:
-      - "${APP_PORT:-8080}:8080"
+    # Port mapping removed - Coolify proxy handles routing via labels
+    # ports:
+    #   - "${APP_PORT:-8080}:8080"
     depends_on:
       db:
         condition: service_healthy
