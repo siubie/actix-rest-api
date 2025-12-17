@@ -1,7 +1,8 @@
 # Multi-stage build for optimized production image
 
 # Build stage
-FROM rust:latest AS builder
+ARG RUST_VERSION=1.91
+FROM rust:${RUST_VERSION} AS builder
 
 # Create a new empty shell project
 WORKDIR /app

@@ -4,6 +4,10 @@ services:
     image: mysql:8.0
     container_name: actix-mysql-prod
     restart: always
+    labels:
+      - "coolify.managed=true"
+      - "coolify.service=database"
+      - "coolify.name=hello-actix-db"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -11,6 +15,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - mysql_prod_data:/var/lib/mysql
+      - mysql_prod_logs:/var/log/mysql
       - ./mysql-prod.cnf:/etc/mysql/conf.d/custom.cnf:ro
     networks:
       - actix-network
@@ -30,9 +35,15 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        RUST_VERSION: "1.75"
+        RUST_VERSION: "1.91"
     container_name: actix-app-prod
     restart: always
+    labels:
+      - "coolify.managed=true"
+      - "coolify.service=application"
+      - "coolify.name=hello-actix"
+      - "coolify.http.enabled=true"
+      - "coolify.http.port=8080"
     environment:
       DATABASE_URL: mysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}
       HOST: 0.0.0.0
@@ -83,4 +94,6 @@ networks:
 
 volumes:
   mysql_prod_data:
+    driver: local
+  mysql_prod_logs:
     driver: local
