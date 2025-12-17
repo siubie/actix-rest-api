@@ -28,6 +28,9 @@ services:
     # Don't expose port in production unless needed for external access
     # ports:
     #   - "3306:3306"
+    # Network configuration removed - Coolify handles networking automatically
+    # networks:
+    #   - actix-network
 
   # Rust Application - Production
   app:
@@ -55,8 +58,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - actix-network
+    # Network configuration removed - Coolify handles networking automatically
+    # networks:
+    #   - actix-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -89,9 +93,10 @@ services:
   #   networks:
   #     - actix-network
 
-networks:
-  actix-network:
-    driver: bridge
+# Network configuration removed - Coolify handles networking automatically
+# networks:
+#   actix-network:
+#     driver: bridge
 
 volumes:
   mysql_prod_data:
