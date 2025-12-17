@@ -17,8 +17,8 @@ services:
       - mysql_prod_data:/var/lib/mysql
       - mysql_prod_logs:/var/log/mysql
       - ./mysql-prod.cnf:/etc/mysql/conf.d/custom.cnf:ro
-    networks:
-      - actix-network
+    # networks:
+    #   - actix-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 30s
